@@ -1,8 +1,16 @@
 package org.sd.menu;
 
+import org.sd.entity.Account;
+import org.sd.entity.AccountHistory;
 import org.sd.entity.User;
+import org.sd.services.AccountService;
+import org.sd.services.DepositService;
 import org.sd.services.UserService;
+import org.sd.services.WithdrawService;
+import org.sd.services.implementations.AccountServiceImpl;
+import org.sd.services.implementations.DepositServiceImpl;
 import org.sd.services.implementations.UserServiceImpl;
+import org.sd.services.implementations.WithdrawServiceImpl;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,13 +19,13 @@ import java.util.Scanner;
 
 public class BankingMenu {
     private static final String ANSI_CLEAR_SCREEN = "\033[2J\033[H";
-    private static final String ANSI_RESET = "\033[0m";
-    private static final String ANSI_HIGHLIGHT = "\033[7m"; // Reverse video
-    private static final String ANSI_NORMAL = "\033[0m";
 
     private final Scanner scanner = new Scanner(System.in);
 
     private final UserService userService = new UserServiceImpl();
+    private final AccountService accountService = new AccountServiceImpl();
+    private final DepositService depositService = new DepositServiceImpl();
+    private final WithdrawService withdrawService = new WithdrawServiceImpl();
 
     public void start() {
         System.out.println("Welcome to Banking System!");
@@ -88,7 +96,11 @@ public class BankingMenu {
     }
 
     private void showViewUserMenu() {
+        System.out.println("=== USER LIST ===");
+        List<User> userList = userService.getAllUsers();
 
+        // Display users in table format
+        displayUserTable(userList);
 
         List<String> options = new ArrayList<>();
         options.add("Edit User");
@@ -110,6 +122,58 @@ public class BankingMenu {
             default:
                 showViewUserMenu();
         }
+    }
+
+    private void displayUserTable(List<User> userList) {
+        if (userList == null || userList.isEmpty()) {
+            System.out.println("No users found.");
+            return;
+        }
+
+        // Define column widths
+        int idWidth = 5;
+        int nameWidth = 20;
+        int emailWidth = 25;
+        int phoneWidth = 15;
+
+        // Print table header
+        System.out.println("+" + "-".repeat(idWidth + 2) +
+                "+" + "-".repeat(nameWidth + 2) +
+                "+" + "-".repeat(emailWidth + 2) +
+                "+" + "-".repeat(phoneWidth + 2) + "+");
+
+        System.out.printf("| %-" + idWidth + "s | %-" + nameWidth + "s | %-" + emailWidth + "s | %-" + phoneWidth + "s |\n",
+                "ID", "Name", "Email", "Phone", "Address");
+
+        System.out.println("+" + "-".repeat(idWidth + 2) +
+                "+" + "-".repeat(nameWidth + 2) +
+                "+" + "-".repeat(emailWidth + 2) +
+                "+" + "-".repeat(phoneWidth + 2) + "+");
+
+        // Print user data
+        for (User user : userList) {
+            String id = user.getId() != null ? user.getId().toString() : "N/A";
+            String name = user.getName() != null ? truncateString(user.getName(), nameWidth) : "N/A";
+            String email = user.getEmail() != null ? truncateString(user.getEmail(), emailWidth) : "N/A";
+            String phone = user.getPhoneNumber() != null ? truncateString(user.getPhoneNumber(), phoneWidth) : "N/A";
+
+            System.out.printf("| %-" + idWidth + "s | %-" + nameWidth + "s | %-" + emailWidth + "s | %-" + phoneWidth + "s |\n",
+                    id, name, email, phone);
+        }
+
+        // Print table footer
+        System.out.println("+" + "-".repeat(idWidth + 2) +
+                "+" + "-".repeat(nameWidth + 2) +
+                "+" + "-".repeat(emailWidth + 2) +
+                "+" + "-".repeat(phoneWidth + 2) + "+");
+
+        System.out.println("Total users: " + userList.size());
+    }
+
+    private String truncateString(String str, int maxLength) {
+        if (str == null) return "";
+        if (str.length() <= maxLength) return str;
+        return str.substring(0, maxLength - 3) + "...";
     }
 
     private void showAccountInformationMenu() {
@@ -213,8 +277,10 @@ public class BankingMenu {
         System.out.print(ANSI_CLEAR_SCREEN);
         System.out.println("=== EDIT USER ===");
         System.out.println("Editing user...");
-        System.out.println("(This is a placeholder - implement your user editing logic here)");
-        System.out.println();
+
+        User user = userService.updateUser();
+
+        System.out.println("User was update successfully: " + user);
         System.out.print("Press Enter to continue...");
         scanner.nextLine();
         showViewUserMenu();
@@ -224,8 +290,13 @@ public class BankingMenu {
         System.out.print(ANSI_CLEAR_SCREEN);
         System.out.println("=== DELETE USER ===");
         System.out.println("Deleting user...");
-        System.out.println("(This is a placeholder - implement your user deletion logic here)");
-        System.out.println();
+
+        boolean deleteUser = userService.deleteUser();
+
+        if (deleteUser) {
+            System.out.println("User was deleted successfully!");
+        }
+
         System.out.print("Press Enter to continue...");
         scanner.nextLine();
         showViewUserMenu();
@@ -235,8 +306,11 @@ public class BankingMenu {
         System.out.print(ANSI_CLEAR_SCREEN);
         System.out.println("=== CREATE ACCOUNT ===");
         System.out.println("Creating new account...");
-        System.out.println("(This is a placeholder - implement your account creation logic here)");
-        System.out.println();
+
+        // Crate Account
+        Account account = accountService.createAccount();
+
+        System.out.println("Account was created successfully: " + account);
         System.out.print("Press Enter to continue...");
         scanner.nextLine();
         showAccountInformationMenu();
@@ -257,8 +331,9 @@ public class BankingMenu {
         System.out.print(ANSI_CLEAR_SCREEN);
         System.out.println("=== DEPOSIT ===");
         System.out.println("Processing deposit...");
-        System.out.println("(This is a placeholder - implement your deposit logic here)");
-        System.out.println();
+
+        AccountHistory accountHistory = depositService.deposit();
+        System.out.println("Deposited account: " + accountHistory);
         System.out.print("Press Enter to continue...");
         scanner.nextLine();
         showMainMenu();
@@ -268,8 +343,10 @@ public class BankingMenu {
         System.out.print(ANSI_CLEAR_SCREEN);
         System.out.println("=== WITHDRAW ===");
         System.out.println("Processing withdrawal...");
-        System.out.println("(This is a placeholder - implement your withdrawal logic here)");
-        System.out.println();
+
+        AccountHistory accountHistory = withdrawService.withdraw();
+        System.out.println("Withdraw from account: " + accountHistory);
+
         System.out.print("Press Enter to continue...");
         scanner.nextLine();
         showMainMenu();

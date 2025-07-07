@@ -7,6 +7,7 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 import org.sd.entity.Account;
+import org.sd.entity.AccountHistory;
 import org.sd.entity.User;
 
 import java.util.Properties;
@@ -27,6 +28,7 @@ public class HibernateUtil {
             // 3. Add entity classes
             configuration.addAnnotatedClass(User.class);
             configuration.addAnnotatedClass(Account.class);
+            configuration.addAnnotatedClass(AccountHistory.class);
 
             // 4. Register HikariCP DataSource manually
             ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
