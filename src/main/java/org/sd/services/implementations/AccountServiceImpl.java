@@ -1,7 +1,9 @@
 package org.sd.services.implementations;
 
 import org.sd.entity.Account;
+import org.sd.entity.AccountHistory;
 import org.sd.entity.User;
+import org.sd.repositories.AccountHistoryRepository;
 import org.sd.repositories.AccountRepository;
 import org.sd.services.AccountService;
 import org.sd.util.Generator;
@@ -13,6 +15,7 @@ import java.util.Scanner;
 public class AccountServiceImpl implements AccountService {
     private final Scanner scanner = new Scanner(System.in);
     AccountRepository accountRepository = new AccountRepository();
+    AccountHistoryRepository accountHistoryRepository = new AccountHistoryRepository();
 
     @Override
     public Account createAccount() {
@@ -59,6 +62,11 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<Account> getAllAccount() {
-        return List.of();
+        return accountRepository.getAllAccount();
+    }
+
+    @Override
+    public List<AccountHistory> getAllAccountHistory() {
+        return accountHistoryRepository.getAllHistory();
     }
 }

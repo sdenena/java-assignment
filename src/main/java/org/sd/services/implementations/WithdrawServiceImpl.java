@@ -47,6 +47,6 @@ public class WithdrawServiceImpl implements WithdrawService {
 
         accountRepository.updateAccount(accountToUpdate);
 
-        return accountHistoryRepository.deposit(accountHistory);
+        return accountHistoryRepository.saveHistory(accountHistory);
     }
 }

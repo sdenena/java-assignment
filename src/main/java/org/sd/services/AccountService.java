@@ -1,6 +1,8 @@
 package org.sd.services;
 
 import org.sd.entity.Account;
+import org.sd.entity.AccountHistory;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -11,4 +13,5 @@ public interface AccountService {
     public Optional<Account> getAccountByAccountNumber(String accountNumber);
     public List<Account> getAccountList(int page, int size);
     public List<Account> getAllAccount();
+    public List<AccountHistory> getAllAccountHistory();
 }

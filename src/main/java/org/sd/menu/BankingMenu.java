@@ -3,14 +3,9 @@ package org.sd.menu;
 import org.sd.entity.Account;
 import org.sd.entity.AccountHistory;
 import org.sd.entity.User;
-import org.sd.services.AccountService;
-import org.sd.services.DepositService;
-import org.sd.services.UserService;
-import org.sd.services.WithdrawService;
-import org.sd.services.implementations.AccountServiceImpl;
-import org.sd.services.implementations.DepositServiceImpl;
-import org.sd.services.implementations.UserServiceImpl;
-import org.sd.services.implementations.WithdrawServiceImpl;
+import org.sd.services.*;
+import org.sd.services.implementations.*;
+import org.sd.util.Table;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,6 +21,7 @@ public class BankingMenu {
     private final AccountService accountService = new AccountServiceImpl();
     private final DepositService depositService = new DepositServiceImpl();
     private final WithdrawService withdrawService = new WithdrawServiceImpl();
+    private final TransferService transferService = new TransferServiceImpl();
 
     public void start() {
         System.out.println("Welcome to Banking System!");
@@ -100,7 +96,7 @@ public class BankingMenu {
         List<User> userList = userService.getAllUsers();
 
         // Display users in table format
-        displayUserTable(userList);
+        Table.displayUserTable(userList);
 
         List<String> options = new ArrayList<>();
         options.add("Edit User");
@@ -124,62 +120,11 @@ public class BankingMenu {
         }
     }
 
-    private void displayUserTable(List<User> userList) {
-        if (userList == null || userList.isEmpty()) {
-            System.out.println("No users found.");
-            return;
-        }
-
-        // Define column widths
-        int idWidth = 5;
-        int nameWidth = 20;
-        int emailWidth = 25;
-        int phoneWidth = 15;
-
-        // Print table header
-        System.out.println("+" + "-".repeat(idWidth + 2) +
-                "+" + "-".repeat(nameWidth + 2) +
-                "+" + "-".repeat(emailWidth + 2) +
-                "+" + "-".repeat(phoneWidth + 2) + "+");
-
-        System.out.printf("| %-" + idWidth + "s | %-" + nameWidth + "s | %-" + emailWidth + "s | %-" + phoneWidth + "s |\n",
-                "ID", "Name", "Email", "Phone", "Address");
-
-        System.out.println("+" + "-".repeat(idWidth + 2) +
-                "+" + "-".repeat(nameWidth + 2) +
-                "+" + "-".repeat(emailWidth + 2) +
-                "+" + "-".repeat(phoneWidth + 2) + "+");
-
-        // Print user data
-        for (User user : userList) {
-            String id = user.getId() != null ? user.getId().toString() : "N/A";
-            String name = user.getName() != null ? truncateString(user.getName(), nameWidth) : "N/A";
-            String email = user.getEmail() != null ? truncateString(user.getEmail(), emailWidth) : "N/A";
-            String phone = user.getPhoneNumber() != null ? truncateString(user.getPhoneNumber(), phoneWidth) : "N/A";
-
-            System.out.printf("| %-" + idWidth + "s | %-" + nameWidth + "s | %-" + emailWidth + "s | %-" + phoneWidth + "s |\n",
-                    id, name, email, phone);
-        }
-
-        // Print table footer
-        System.out.println("+" + "-".repeat(idWidth + 2) +
-                "+" + "-".repeat(nameWidth + 2) +
-                "+" + "-".repeat(emailWidth + 2) +
-                "+" + "-".repeat(phoneWidth + 2) + "+");
-
-        System.out.println("Total users: " + userList.size());
-    }
-
-    private String truncateString(String str, int maxLength) {
-        if (str == null) return "";
-        if (str.length() <= maxLength) return str;
-        return str.substring(0, maxLength - 3) + "...";
-    }
-
     private void showAccountInformationMenu() {
         List<String> options = new ArrayList<>();
         options.add("Create Account");
         options.add("View Account");
+        options.add("View Account History");
         options.add("← Back to Main Menu");
 
         int choice = showMenu("=== ACCOUNT INFORMATION ===", options);
@@ -192,6 +137,9 @@ public class BankingMenu {
                 handleViewAccount();
                 break;
             case 2:
+                handleViewAccountHistory();
+                break;
+            case 3:
                 showMainMenu();
                 break;
             default:
@@ -319,9 +267,11 @@ public class BankingMenu {
     private void handleViewAccount() {
         System.out.print(ANSI_CLEAR_SCREEN);
         System.out.println("=== VIEW ACCOUNT ===");
-        System.out.println("Viewing account details...");
-        System.out.println("(This is a placeholder - implement your account viewing logic here)");
-        System.out.println();
+        List<Account> accountList = accountService.getAllAccount();
+
+        // Display users in table format
+        Table.displayUserTable(accountList);
+
         System.out.print("Press Enter to continue...");
         scanner.nextLine();
         showAccountInformationMenu();
@@ -356,8 +306,24 @@ public class BankingMenu {
         System.out.print(ANSI_CLEAR_SCREEN);
         System.out.println("=== TRANSFER ===");
         System.out.println("Processing transfer...");
-        System.out.println("(This is a placeholder - implement your transfer logic here)");
-        System.out.println();
+
+        AccountHistory accountHistory = transferService.transfer();
+        System.out.println("Withdraw from account: " + accountHistory);
+
+        System.out.print("Press Enter to continue...");
+        scanner.nextLine();
+        showMainMenu();
+    }
+
+    private void handleViewAccountHistory() {
+        System.out.print(ANSI_CLEAR_SCREEN);
+        System.out.println("=== VIEW ACCOUNT HISTORY ===");
+
+        List<AccountHistory> accountHistoryList = accountService.getAllAccountHistory();
+
+        // Display users in table format
+        Table.displayUserTable(accountHistoryList);
+
         System.out.print("Press Enter to continue...");
         scanner.nextLine();
         showMainMenu();

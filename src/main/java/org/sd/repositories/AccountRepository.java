@@ -74,9 +74,8 @@ public class AccountRepository {
     public List<Account> getAllAccount() {
         try(Session session = HibernateUtil.getSessionFactory().openSession()) {
             Query<Account> query = session.createQuery(
-                    "FROM Account u ORDER BY u.id DESC", Account.class
-            );
-            return query.getResultList();
+                    "SELECT a FROM Account a JOIN FETCH a.user", Account.class);
+            return query.list();
         } catch (Exception e) {
             System.err.println("Error getting all account: " + e.getMessage());
             throw new RuntimeException("Error getting all account: " + e.getMessage());

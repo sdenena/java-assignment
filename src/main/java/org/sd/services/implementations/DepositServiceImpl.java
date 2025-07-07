@@ -41,6 +41,6 @@ public class DepositServiceImpl implements DepositService {
 
         accountRepository.updateAccount(accountToUpdate);
 
-        return accountHistoryRepository.deposit(accountHistory);
+        return accountHistoryRepository.saveHistory(accountHistory);
     }
 }
